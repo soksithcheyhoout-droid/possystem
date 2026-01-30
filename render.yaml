@@ -1,8 +1,9 @@
 services:
   - type: web
     name: possystem
-    runtime: docker
+    runtime: php
     plan: free
+    buildCommand: composer install --no-dev && php artisan migrate --force
     envVars:
       - key: APP_ENV
         value: production
