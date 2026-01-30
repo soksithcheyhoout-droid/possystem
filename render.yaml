@@ -3,12 +3,12 @@ services:
     name: possystem
     env: php
     plan: free
-    buildCommand: composer install && npm install && npm run build && php artisan migrate --force
+    buildCommand: composer install --no-dev && php artisan migrate --force
     startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
-      - key: APP_KEY
-        fromBuild: true
+      - key: DB_CONNECTION
+        value: sqlite
