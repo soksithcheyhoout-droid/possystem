@@ -14,7 +14,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install -j$(nproc) \
+    pdo \
+    pdo_sqlite \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -29,13 +35,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Generate app key
-RUN php artisan key:generate
+# Generate app key if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-# Run migrations
-RUN php artisan migrate --force
+# Create storage directories
+RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
